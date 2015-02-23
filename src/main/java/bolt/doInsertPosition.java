@@ -146,7 +146,7 @@ public class doInsertPosition extends BaseFunction implements Function {
         	
         	// Update current timestamp
         	List<Integer> xways = new ArrayList<Integer>(Arrays.asList(xway));
-        	List<Long> tods = new ArrayList<Long>(Arrays.asList(tod));
+        	List<Long> tods = new ArrayList<Long>(Arrays.asList(newMinTOD));
         	List<Long> tss = new ArrayList<Long>(Arrays.asList(time));
         	timestampState.setXwayBulk(xways, tods, tss);
         	
