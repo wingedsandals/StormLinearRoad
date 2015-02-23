@@ -18,7 +18,7 @@ public class TimestampDB extends TridentState implements State {
 	}
 
 	Map<Integer, Timestamp> timestamps = new HashMap<Integer, Timestamp>();
-
+	
 	@Override
 	public void beginCommit(Long txid) {
 		// TODO Auto-generated method stub

@@ -93,11 +93,11 @@ public class LinearRoadTridentTopology extends TridentTopology {
         							MemcachedState.opaque(LinearRoadConstants.servers), 
         							new TimestampStateUpdater());
         
-        AccidentSpout accidentSpout = new AccidentSpout();
-        Stream accidentS = topology.newStream("AccidentSpout", accidentSpout);
-        AccidentDB accidentState = (AccidentDB) accidentS.partitionPersist(
-									MemcachedState.opaque(LinearRoadConstants.servers), 
-									new AccidentStateUpdater());
+//        AccidentSpout accidentSpout = new AccidentSpout();
+//        Stream accidentS = topology.newStream("AccidentSpout", accidentSpout);
+//        AccidentDB accidentState = (AccidentDB) accidentS.partitionPersist(
+//									MemcachedState.opaque(LinearRoadConstants.servers), 
+//									new AccidentStateUpdater());
         
         Stream inputS = topology.newStream("LinearRoadSpout", linearRoadSpout);
         Stream insertPositionS = inputS.each(new Fields("flag"), new FilterInsertPositionBolt());
@@ -105,7 +105,7 @@ public class LinearRoadTridentTopology extends TridentTopology {
         Stream getDailyExpenditureS = inputS.each(new Fields("flag"), new FilterGetDailyExpenditureBolt());
         Stream getTravelEstimateS = inputS.each(new Fields("flag"), new FilterGetTravelEstimateBolt());
         
-        doInsertPosition(insertPositionS, timestampState, accidentS, accidentState, linearRoadSpoutFields, positionMapState);
+        doInsertPosition(topology, insertPositionS, timestampState, linearRoadSpoutFields, positionMapState);
         doGetAccountBalance(getAccountBalanceS);
         doGetDailyExpenditure(getDailyExpenditureS);
         doGetTravelEstimate(getTravelEstimateS);
@@ -114,8 +114,8 @@ public class LinearRoadTridentTopology extends TridentTopology {
     }
     
     
-    private static void doInsertPosition(Stream insertPositionS, TimestampDB timestampState,
-    		Stream accidentS, AccidentDB accidentState, Fields linearRoadSpoutFields, StateFactory positionMapState) {
+    private static void doInsertPosition(TridentTopology topology, Stream insertPositionS, TimestampDB timestampState,
+    		Fields linearRoadSpoutFields, StateFactory positionMapState) {
 
     	// Insert into position
     	PositionDB positionState = (PositionDB) insertPositionS.partitionPersist(
@@ -123,7 +123,7 @@ public class LinearRoadTridentTopology extends TridentTopology {
 				new PositionStateUpdater());
     	
     	insertPositionS.each(linearRoadSpoutFields, 
-    			new doInsertPosition(timestampState, positionState, accidentS, accidentState), null);
+    			new doInsertPosition(topology, timestampState, positionState), null);
     	
 //    	insertPositionS.stateQuery(timestampState, new Fields("xway"), new QueryTimestamp(), new Fields("tod", "ts"))
 //    					.stateQuery(positionState, new Fields("xway", "vid", "ts", "tod"), new QueryPrevPosition(), new Fields("seg"))

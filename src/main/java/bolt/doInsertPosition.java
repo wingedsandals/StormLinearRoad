@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import spout.AccidentSpout;
 import state.Accident;
 import state.AccidentDB;
 import state.AccidentKey;
+import state.AccidentStateUpdater;
 import state.Position;
 import state.PositionDB;
 import state.PositionKey;
@@ -19,8 +21,10 @@ import state.TimestampDB;
 import state.Vehicle;
 import state.VehicleDB;
 import state.VehicleKey;
+import state.memcached.MemcachedState;
 import storm.trident.Stream;
 import storm.trident.TridentState;
+import storm.trident.TridentTopology;
 import storm.trident.operation.BaseFunction;
 import storm.trident.operation.Function;
 import storm.trident.operation.TridentCollector;
@@ -43,12 +47,13 @@ public class doInsertPosition extends BaseFunction implements Function {
 	SegmentHistoryDB segmentHistoryState;
 	VehicleDB vehicleState;
 
-	public doInsertPosition(TimestampDB timestampState, PositionDB positionState, 
-			Stream accidentS, AccidentDB accidentState) {
+	public doInsertPosition(TridentTopology topology, TimestampDB timestampState, PositionDB positionState) {
 		this.timestampState = timestampState;
 		this.positionState = positionState;
-		this.accidentS = accidentS;
-		this.accidentState = accidentState;
+		this.accidentS = topology.newStream("AccidentSpout", new AccidentSpout());
+		this.accidentState = (AccidentDB) accidentS.partitionPersist(
+				MemcachedState.opaque(LinearRoadConstants.servers), 
+				new AccidentStateUpdater());
 	}
 	
 	@Override
@@ -80,11 +85,13 @@ public class doInsertPosition extends BaseFunction implements Function {
         int segbegin = tuple.getInteger(11);;
         int segend = tuple.getInteger(12);
         int day = tuple.getInteger(13);
-        long tod = tuple.getLong(14);
+//        long tod = tuple.getLong(14);
+        long tod = time / 60;
 		
         List<Timestamp> timestamps = 
         		timestampState.getXwayBulk(new ArrayList<Integer>(Arrays.asList(xway)));
-        Integer timestampsCnt = timestamps.size();
+        Integer timestampCnt = timestamps.size();
+        assert(timestampCnt > 0);      
         Long currTOD = timestamps.get(0).tod;
         Long currTS = timestamps.get(0).ts;
         
@@ -92,6 +99,7 @@ public class doInsertPosition extends BaseFunction implements Function {
         List<Position> prevPositions =
         		positionState.getXwayBulk(new ArrayList<PositionKey>(Arrays.asList(positionKey)));
         
+        //////////////////calculate personal tolls (could be its own SP////////////////////////////////
         if (lane == LinearRoadConstants.ENTRANCE_LANE || prevPositions.size() != 0) {
         	int prevSeg = -1;
         	if (prevPositions.size() > 0) {
@@ -118,6 +126,10 @@ public class doInsertPosition extends BaseFunction implements Function {
         		vehicleKeys.add(vehicleKey);
         		List<Vehicle> vehicles =
         				vehicleState.getVehicleBulk(vehicleKeys);
+
+        		/////////////////////////////
+        		//send toll and accident notifications here
+        		/////////////////////////////
         		
         		int toll = 0;
         		if (segmentHistories.size() > 0) {
@@ -138,20 +150,22 @@ public class doInsertPosition extends BaseFunction implements Function {
         		}
         	}
         }
+        ///////////////////end calculate personal tolls///////////////////////////////////////////////        	
         
         if (currTOD < tod) {
         	long newMinTOD = currTOD - LinearRoadConstants.NUM_MINUTES_HISTORY;
         	long currCount = accidentState.getAccidentCount();
-        	// TODO: add the accident to the stream
+        	// TODO: add the accident to the stream and the accidentDB is updated
         	
         	// Update current timestamp
         	List<Integer> xways = new ArrayList<Integer>(Arrays.asList(xway));
-        	List<Long> tods = new ArrayList<Long>(Arrays.asList(newMinTOD));
+        	List<Long> tods = new ArrayList<Long>(Arrays.asList(tod));
         	List<Long> tss = new ArrayList<Long>(Arrays.asList(time));
         	timestampState.setXwayBulk(xways, tods, tss);
         	
         	// Remove old position
-        	positionState.removeXwayBulk(xways, tods);
+        	List<Long> newMinTODs = new ArrayList<Long>(Arrays.asList(newMinTOD));
+        	positionState.removeXwayBulk(xways, newMinTODs);
         }
 	}
 
