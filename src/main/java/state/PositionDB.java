@@ -3,6 +3,7 @@ package state;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,17 @@ public class PositionDB extends TridentState implements State {
 		return ret;
 	}
 	
+	
+	// Linear search - bad! We should come with better solutions. MemcachedState maybe?
 	public void removeXwayBulk(List<Integer> xways, List<Long> tod) {
-		// TODO: remove in bulk by xway and tod
-		
+		Iterator<Map.Entry<String,Position>> iter = positions.entrySet().iterator();
+		while (iter.hasNext()) {
+		    Map.Entry<String,Position> entry = iter.next();
+		    if(xways.contains(entry.getKey()) && 
+		    		entry.getValue().tod < tod.get(xways.indexOf(entry.getValue().xway))){
+		        iter.remove();
+		    }
+		}		
 	}
+	
 }

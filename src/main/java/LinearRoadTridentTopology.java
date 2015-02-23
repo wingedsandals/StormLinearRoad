@@ -4,7 +4,7 @@ import backtype.storm.LocalDRPC;
 import backtype.storm.generated.StormTopology;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
-import bolt.doInsertPosition;
+import bolt.InsertPositionBolt;
 import bolt.FilterGetDailyExpenditureBolt;
 import bolt.FilterGetTravelEstimateBolt;
 import bolt.FilterInsertPositionBolt;
@@ -123,7 +123,7 @@ public class LinearRoadTridentTopology extends TridentTopology {
 				new PositionStateUpdater());
     	
     	insertPositionS.each(linearRoadSpoutFields, 
-    			new doInsertPosition(topology, timestampState, positionState), null);
+    			new InsertPositionBolt(topology, timestampState, positionState), null);
     	
 //    	insertPositionS.stateQuery(timestampState, new Fields("xway"), new QueryTimestamp(), new Fields("tod", "ts"))
 //    					.stateQuery(positionState, new Fields("xway", "vid", "ts", "tod"), new QueryPrevPosition(), new Fields("seg"))
