@@ -47,4 +47,14 @@ public class TimestampDB extends TridentState implements State {
 		return ret;
 	}
 	
+	public Long getMaxTS() {
+		Long ts = Long.MIN_VALUE;
+		for (Integer k : timestamps.keySet()) {
+			if (timestamps.get(k).ts > ts) {
+				ts = timestamps.get(k).ts;
+			}
+		}
+		return ts;
+	}
+	
 }

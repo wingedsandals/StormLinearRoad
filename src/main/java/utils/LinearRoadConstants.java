@@ -25,6 +25,7 @@ public class LinearRoadConstants {
 	
 	public static final String VEHICLE_TABLE_NAME = "tolls_per_vehicle";
 	public static final String SEG_STATS_TABLE_NAME = "segment_history";
+	public static final String EMIT_TIME_STR = "XXXXX";
 	
 	public static final int  BATCH_SIZE = 1000;
 	public static final int  MAX_ARRAY_SIZE = 10000000;
@@ -37,6 +38,7 @@ public class LinearRoadConstants {
     public static final long DETECT_ACCIDENT_SUCCESSFUL = 1;
     public static final long CALCULATE_TOLLS_SUCCESSFUL = 2;
     public static final long PROCEDURE_SUCCESSFUL = 4;
+    public static final long INSERT_POSITION_ERR_BAD_SEG = 5;
     
     public static final int NUMBER_OF_XWAYS = 1;
     public static final int NUM_PARTITIONS = 1;
@@ -48,7 +50,9 @@ public class LinearRoadConstants {
     public static final int ENTRANCE_LANE = 0;
     public static final int EXIT_LANE = 4;
     
-    public static final int PORT_NUM = 8800;
+    public static final int IN_PORT_NUM = 8800;
+    public static final int OUT_PORT_NUM = 8900;
+    public static final String OUT_HOST = "localhost";
     
     public static int findPartId(int xway)
     {

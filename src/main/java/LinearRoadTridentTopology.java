@@ -2,8 +2,11 @@ import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.LocalDRPC;
 import backtype.storm.generated.StormTopology;
+import backtype.storm.topology.IRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
+import bolt.FilterGetVidBolt;
+import bolt.GetAccountBalanceBolt;
 import bolt.InsertPositionBolt;
 import bolt.FilterGetDailyExpenditureBolt;
 import bolt.FilterGetTravelEstimateBolt;
@@ -13,6 +16,7 @@ import bolt.FilterTimestampBolt;
 import spout.AccidentSpout;
 import spout.LinearRoadSpout;
 import spout.TimestampSpout;
+import spout.TollsPerVehicleSpout;
 import state.AccidentDB;
 import state.AccidentStateUpdater;
 import state.PositionDB;
@@ -20,6 +24,8 @@ import state.PositionStateUpdater;
 import state.QueryTimestamp;
 import state.TimestampDB;
 import state.TimestampStateUpdater;
+import state.TollsPerVehicleDB;
+import state.TollsPerVehicleStateUpdater;
 import state.memcached.MemcachedState;
 import storm.trident.Stream;
 import storm.trident.TridentState;
@@ -93,6 +99,13 @@ public class LinearRoadTridentTopology extends TridentTopology {
         							MemcachedState.opaque(LinearRoadConstants.servers), 
         							new TimestampStateUpdater());
         
+        TollsPerVehicleSpout tollsPerVehicleSpout = new TollsPerVehicleSpout();
+        Stream tollsPerVehicleS = topology.newStream("TollsPerVehicleSpout", tollsPerVehicleSpout);
+        TollsPerVehicleDB tollsPerVehicleState = 
+        		(TollsPerVehicleDB) tollsPerVehicleS.partitionPersist(
+        							MemcachedState.opaque(LinearRoadConstants.servers), 
+        							new TollsPerVehicleStateUpdater());
+        
 //        AccidentSpout accidentSpout = new AccidentSpout();
 //        Stream accidentS = topology.newStream("AccidentSpout", accidentSpout);
 //        AccidentDB accidentState = (AccidentDB) accidentS.partitionPersist(
@@ -106,7 +119,7 @@ public class LinearRoadTridentTopology extends TridentTopology {
         Stream getTravelEstimateS = inputS.each(new Fields("flag"), new FilterGetTravelEstimateBolt());
         
         doInsertPosition(topology, insertPositionS, timestampState, linearRoadSpoutFields, positionMapState);
-        doGetAccountBalance(getAccountBalanceS);
+        doGetAccountBalance(topology, getAccountBalanceS, linearRoadSpoutFields, tollsPerVehicleState, timestampState);
         doGetDailyExpenditure(getDailyExpenditureS);
         doGetTravelEstimate(getTravelEstimateS);
         
@@ -138,8 +151,15 @@ public class LinearRoadTridentTopology extends TridentTopology {
     }
     
     
-    private static void doGetAccountBalance(Stream getAccountBalanceS) {
-    	
+    private static void doGetAccountBalance(TridentTopology topology,
+    		Stream getAccountBalanceS,
+    		Fields linearRoadSpoutFields,
+    		TollsPerVehicleDB tollsPerVehicleState,
+    		TimestampDB timestampState) {
+
+    	getAccountBalanceS.each(linearRoadSpoutFields,
+    			new GetAccountBalanceBolt(topology, tollsPerVehicleState,
+    					timestampState), null);
     }
 
     
