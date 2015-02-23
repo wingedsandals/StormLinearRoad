@@ -30,7 +30,7 @@ public class Position implements Serializable {
 
     public Position(long time, long vid, long qid, int spd, int xway,
     				int lane, int dir, int seg, int pos, int segbegin, int segend,
-    				int day, int tod) {
+    				int day, long tod) {
         this.time = time;
         this.vid = vid;
         this.qid = qid;

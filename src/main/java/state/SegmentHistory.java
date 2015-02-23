@@ -81,7 +81,7 @@ public class SegmentHistory implements Serializable {
                 this.lav + " " +
                 this.cnt + " " +
                 this.toll + " " +
-                this.dow + "\n";
+                this.dow;
     }
 
 }
