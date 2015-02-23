@@ -12,4 +12,11 @@ public class PositionKey {
 		this.tod = tod;
 		this.vid = vid;
 	}
+	
+	public String toString() {
+		return String.valueOf(this.xway) + " " +
+				String.valueOf(this.ts) + " " +
+				String.valueOf(this.tod) + " " +
+				String.valueOf(this.vid);
+	}
 }

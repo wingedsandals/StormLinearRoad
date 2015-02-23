@@ -18,7 +18,7 @@ public class PositionDB extends TridentState implements State {
 		// TODO Auto-generated constructor stub
 	}
 
-	Map<PositionKey, Position> positions = new HashMap<PositionKey, Position>();
+	Map<String, Position> positions = new HashMap<String, Position>();
 
 	@Override
 	public void beginCommit(Long txid) {
@@ -35,7 +35,7 @@ public class PositionDB extends TridentState implements State {
 	public void setXwayBulk(List<Position> positions) {
 		for (int i = 0; i < positions.size(); i++) {
 			this.positions.put(
-					new PositionKey(positions.get(i).xway, positions.get(i).time, positions.get(i).tod, positions.get(i).vid), 
+					new PositionKey(positions.get(i).xway, positions.get(i).time, positions.get(i).tod, positions.get(i).vid).toString(), 
 					new Position(positions.get(i)));
 		}
 		
@@ -44,7 +44,7 @@ public class PositionDB extends TridentState implements State {
 	public List<Position> getXwayBulk(List<PositionKey> positionKeys) {
 		List<Position> ret = new ArrayList<Position>();
 		for (PositionKey positionKey: positionKeys) {
-			ret.add(positions.get(positionKey));
+			ret.add(positions.get(positionKey.toString()));
 		}
 		
 		return ret;

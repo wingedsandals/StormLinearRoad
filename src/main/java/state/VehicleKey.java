@@ -9,4 +9,8 @@ public class VehicleKey {
 		this.xway = xway;
 	}
 	
+	public String toString() {
+		return String.valueOf(this.vid) + " " +
+				String.valueOf(this.xway);
+	}
 }

@@ -18,7 +18,7 @@ public class VehicleDB extends TridentState implements State {
 		// TODO Auto-generated constructor stub
 	}
 
-	Map<VehicleKey, Vehicle> vehicles = new HashMap<VehicleKey, Vehicle>();
+	Map<String, Vehicle> vehicles = new HashMap<String, Vehicle>();
 
 	@Override
 	public void beginCommit(Long txid) {
@@ -35,7 +35,7 @@ public class VehicleDB extends TridentState implements State {
 	public void setVehicleBulk(List<Vehicle> vehicles, List<Integer> balances) {
 		for (int i = 0; i < vehicles.size(); i++) {
 			this.vehicles.put(
-					new VehicleKey(vehicles.get(i).vid, vehicles.get(i).xway), 
+					new VehicleKey(vehicles.get(i).vid, vehicles.get(i).xway).toString(), 
 					new Vehicle(vehicles.get(i).vid, vehicles.get(i).xway, balances.get(i)));
 		}
 		
@@ -44,7 +44,7 @@ public class VehicleDB extends TridentState implements State {
 	public List<Vehicle> getVehicleBulk(List<VehicleKey> vehicleKeys) {
 		List<Vehicle> ret = new ArrayList<Vehicle>();
 		for (VehicleKey vehicleKey: vehicleKeys) {
-			ret.add(vehicles.get(vehicleKey));
+			ret.add(vehicles.get(vehicleKey.toString()));
 		}
 		
 		return ret;

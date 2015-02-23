@@ -18,7 +18,7 @@ public class SegmentHistoryDB extends TridentState implements State {
 		// TODO Auto-generated constructor stub
 	}
 
-	Map<SegmentHistoryKey, SegmentHistory> segmentHistories = new HashMap<SegmentHistoryKey, SegmentHistory>();
+	Map<String, SegmentHistory> segmentHistories = new HashMap<String, SegmentHistory>();
 
 	@Override
 	public void beginCommit(Long txid) {
@@ -40,7 +40,7 @@ public class SegmentHistoryDB extends TridentState implements State {
 							segmentHistories.get(i).seg, 
 							segmentHistories.get(i).absday,
 							segmentHistories.get(i).dow,
-							segmentHistories.get(i).tod), 
+							segmentHistories.get(i).tod).toString(), 
 					new SegmentHistory(segmentHistories.get(i)));
 		}
 		
@@ -49,7 +49,7 @@ public class SegmentHistoryDB extends TridentState implements State {
 	public List<SegmentHistory> getSegmentHistoryBulk(List<SegmentHistoryKey> segmentHistoryKeys) {
 		List<SegmentHistory> ret = new ArrayList<SegmentHistory>();
 		for (SegmentHistoryKey segmentHistoryKey: segmentHistoryKeys) {
-			ret.add(segmentHistories.get(segmentHistoryKey));
+			ret.add(segmentHistories.get(segmentHistoryKey.toString()));
 		}
 		
 		return ret;

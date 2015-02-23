@@ -18,7 +18,7 @@ public class AccidentDB extends TridentState implements State {
 		// TODO Auto-generated constructor stub
 	}
 
-	Map<AccidentKey, Accident> accidents = new HashMap<AccidentKey, Accident>();
+	Map<String, Accident> accidents = new HashMap<String, Accident>();
 
 	@Override
 	public void beginCommit(Long txid) {
@@ -35,7 +35,7 @@ public class AccidentDB extends TridentState implements State {
 	public void setAccidentBulk(List<Accident> accidents) {
 		for (int i = 0; i < accidents.size(); i++) {
 			this.accidents.put(
-					new AccidentKey(accidents.get(i).xway, accidents.get(i).lane, accidents.get(i).dir, accidents.get(i).seg), 
+					new AccidentKey(accidents.get(i).xway, accidents.get(i).lane, accidents.get(i).dir, accidents.get(i).seg).toString(), 
 					new Accident(accidents.get(i)));
 		}
 		
@@ -44,7 +44,7 @@ public class AccidentDB extends TridentState implements State {
 	public List<Accident> getAccidentBulk(List<AccidentKey> accidentKeys) {
 		List<Accident> ret = new ArrayList<Accident>();
 		for (AccidentKey accidentKey: accidentKeys) {
-			ret.add(accidents.get(accidentKey));
+			ret.add(accidents.get(accidentKey.toString()));
 		}
 		
 		return ret;

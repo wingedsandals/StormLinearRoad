@@ -28,4 +28,12 @@ public class SegmentHistoryKey {
 		this.tod = tod;
 	}
 	
+	public String toStrng() {
+		return String.valueOf(this.xway) + " " +
+				String.valueOf(this.dir) + " " +
+				String.valueOf(this.seg) + " " +
+				String.valueOf(this.absday) + " " +
+				String.valueOf(this.tod);
+	}
+	
 }

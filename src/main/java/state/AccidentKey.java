@@ -18,4 +18,10 @@ public class AccidentKey {
 		this.dir = dir;
 		this.seg = seg;
 	}
+	
+	public String toString() {
+		return String.valueOf(this.xway) + " " +
+				String.valueOf(this.dir) +  " " +
+				String.valueOf(this.seg);
+	}
 }
