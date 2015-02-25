@@ -10,6 +10,7 @@ import bolt.CalculateTollsBolt;
 import bolt.DetectAccidentBolt;
 import bolt.FilterGetVidBolt;
 import bolt.GetAccountBalanceBolt;
+import bolt.GetDailyExpenditureBolt;
 import bolt.InsertPositionBolt;
 import bolt.FilterGetDailyExpenditureBolt;
 import bolt.FilterGetTravelEstimateBolt;
@@ -24,6 +25,8 @@ import spout.TimestampSpout;
 import spout.TollsPerVehicleSpout;
 import state.AccidentDB;
 import state.AccidentStateUpdater;
+import state.InputDB;
+import state.InputStateUpdater;
 import state.PositionDB;
 import state.PositionStateUpdater;
 import state.SegmentHistoryDB;
@@ -127,20 +130,19 @@ public class LinearRoadTridentTopology extends TridentTopology {
 				new SegmentHistoryStateUpdater());
         
         Stream inputS = topology.newStream("LinearRoadSpout", linearRoadSpout);
+        InputDB inputState = (InputDB) inputS.partitionPersist(
+				MemcachedState.opaque(LinearRoadConstants.servers), 
+				new InputStateUpdater());
         
-//        inputS.each(new Fields("flag"), new SplitStreamBolt(topology), null);
-//        TopologyBuilder builder = new TopologyBuilder();
-//        builder.setBolt("insertPosition", new );
-        
-        Stream insertPositionS = inputS.each(new Fields("flag"), new FilterInsertPositionBolt());
-        Stream getAccountBalanceS = inputS.each(new Fields("flag"), new FilterGetAccountBalanceBolt());
-        Stream getDailyExpenditureS = inputS.each(new Fields("flag"), new FilterGetDailyExpenditureBolt());
-        Stream getTravelEstimateS = inputS.each(new Fields("flag"), new FilterGetTravelEstimateBolt());
-        
+        Stream insertPositionS = inputState.newValuesStream().each(new Fields("flag"), new FilterInsertPositionBolt());
+        Stream getAccountBalanceS = inputState.newValuesStream().each(new Fields("flag"), new FilterGetAccountBalanceBolt());
+        Stream getDailyExpenditureS = inputState.newValuesStream().each(new Fields("flag"), new FilterGetDailyExpenditureBolt());
+        Stream getTravelEstimateS = inputState.newValuesStream().each(new Fields("flag"), new FilterGetTravelEstimateBolt());
+
         doInsertPosition(topology, insertPositionS, timestampState, accidentState, segmentHistoryState, linearRoadSpoutFields, positionMapState);
         doGetAccountBalance(topology, getAccountBalanceS, linearRoadSpoutFields, tollsPerVehicleState, timestampState);
-        doGetDailyExpenditure(getDailyExpenditureS);
-        doGetTravelEstimate(getTravelEstimateS);
+        doGetDailyExpenditure(topology, getDailyExpenditureS, linearRoadSpoutFields, tollsPerVehicleState);
+        doGetTravelEstimate(topology, getTravelEstimateS, linearRoadSpoutFields, segmentHistoryState);
         
         return topology.build();
     }
@@ -187,13 +189,25 @@ public class LinearRoadTridentTopology extends TridentTopology {
     }
 
     
-    private static void doGetDailyExpenditure(Stream getDailyExpenditureS) {
+    private static void doGetDailyExpenditure(TridentTopology topology,
+    		Stream getDailyExpenditureS,
+    		Fields linearRoadSpoutFields,
+    		TollsPerVehicleDB tollsPerVehicleState) {
     	
+    	getDailyExpenditureS.each(linearRoadSpoutFields,
+    			new GetDailyExpenditureBolt(topology, tollsPerVehicleState),
+    			null);
     }
     
     
-    private static void doGetTravelEstimate(Stream getTravelEstimateS) {
+    private static void doGetTravelEstimate(TridentTopology topology,
+    		Stream getTravelEstimateS,
+    		Fields linearRoadSpoutFields,
+    		SegmentHistoryDB segmentHistoryState) {
     	
+    	getTravelEstimateS.each(linearRoadSpoutFields,
+    			new GetTravelEstimateBolt(topology, segmentHistoryState),
+    			null);
     }
     
 }

@@ -52,5 +52,10 @@ public class TollsPerVehicleDB extends TridentState implements State {
 		return ret;
 	}
 	
+	// TODO: get tolls by given xway, vid and tollday
+	public Long getTolls(int xway, long vid, int tollday) {
+		Long tolls = (long) 0;
+		return tolls;
+	}
 
 }
