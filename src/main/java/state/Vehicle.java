@@ -3,7 +3,7 @@ package state;
 import java.io.Serializable;
 
 /**
- * Created by cpa on 2/12/15.
+ * Created by jdu on 2/12/15.
  */
 public class Vehicle implements Serializable {
     /**

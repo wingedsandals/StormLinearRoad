@@ -4,7 +4,7 @@ import storm.trident.operation.BaseFilter;
 import storm.trident.tuple.TridentTuple;
 
 /**
- * Created by cpa on 2/18/15.
+ * Created by jdu on 2/18/15.
  */
 public class FilterGetAccountBalanceBolt extends BaseFilter {
     @Override

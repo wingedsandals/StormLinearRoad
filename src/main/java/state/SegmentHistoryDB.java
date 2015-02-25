@@ -55,4 +55,8 @@ public class SegmentHistoryDB extends TridentState implements State {
 		return ret;
 	}
 	
+	// update toll on the values
+	public void updateToll(List<SegmentHistoryKey> segmentHistoryKeys) {
+		setSegmentHistoryBulk(getSegmentHistoryBulk(segmentHistoryKeys));
+	}
 }

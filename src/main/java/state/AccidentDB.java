@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import backtype.storm.tuple.Values;
+
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.planner.Node;
@@ -52,6 +54,18 @@ public class AccidentDB extends TridentState implements State {
 	
 	public Integer getAccidentCount() {
 		return accidents.size();
+	}
+	
+	// TODO: Remove accidents by xway
+	public void clearAccidents(int xway) {
+		
+	}
+	
+	// TODO: "SELECT dir, seg FROM accidents WHERE xway = ?"
+	public List<Values> getAccidents(int xway) {
+		List<Values> ret = new ArrayList<Values>();
+		
+		return ret;
 	}
 	
 }

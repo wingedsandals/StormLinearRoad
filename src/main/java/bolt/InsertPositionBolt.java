@@ -37,6 +37,7 @@ import backtype.storm.task.TopologyContext;
 import backtype.storm.topology.IRichBolt;
 import backtype.storm.topology.OutputFieldsDeclarer;
 import backtype.storm.tuple.Tuple;
+import backtype.storm.tuple.Values;
 
 public class InsertPositionBolt extends BaseFunction implements Function {
 	
@@ -50,16 +51,14 @@ public class InsertPositionBolt extends BaseFunction implements Function {
 	public InsertPositionBolt(TridentTopology topology, TimestampDB timestampState, PositionDB positionState) {
 		this.timestampState = timestampState;
 		this.positionState = positionState;
-		this.accidentS = topology.newStream("AccidentSpout", new AccidentSpout());
-		this.accidentState = (AccidentDB) accidentS.partitionPersist(
-				MemcachedState.opaque(LinearRoadConstants.servers), 
-				new AccidentStateUpdater());
+//		this.accidentS = topology.newStream("AccidentSpout", new AccidentSpout());
+//		this.accidentState = (AccidentDB) accidentS.partitionPersist(
+//				MemcachedState.opaque(LinearRoadConstants.servers), 
+//				new AccidentStateUpdater());
 	}
 	
-	@Override
-	public void prepare(Map conf, TridentOperationContext context) {
+	public void prepare(Map conf, TridentOperationContext context, OutputCollector collector) {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -155,7 +154,6 @@ public class InsertPositionBolt extends BaseFunction implements Function {
         if (currTOD < tod) {
         	long newMinTOD = currTOD - LinearRoadConstants.NUM_MINUTES_HISTORY;
         	long currCount = accidentState.getAccidentCount();
-        	// TODO: add the accident to the stream and the accidentDB is updated
         	
         	// Update current timestamp
         	List<Integer> xways = new ArrayList<Integer>(Arrays.asList(xway));
@@ -166,6 +164,9 @@ public class InsertPositionBolt extends BaseFunction implements Function {
         	// Remove old position
         	List<Long> newMinTODs = new ArrayList<Long>(Arrays.asList(newMinTOD));
         	positionState.removeXwayBulk(xways, newMinTODs);
+
+        	// add the accident to the stream and the accidentDB is updated
+        	collector.emit(new Values(xway, currTOD, currTS));
         }
 	}
 

@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import backtype.storm.tuple.Values;
+
 import storm.trident.TridentState;
 import storm.trident.TridentTopology;
 import storm.trident.planner.Node;
@@ -62,6 +64,28 @@ public class PositionDB extends TridentState implements State {
 		        iter.remove();
 		    }
 		}		
+	}
+	
+	// TODO: count on xway, vid, lane, dir, seg, pos
+	public List<Values> getAggregate() {
+		List ret = new ArrayList();
+		// TODO:
+		Values v = new Values();
+		ret.add(v);
+		
+		return ret;
+	}
+	
+	// TODO: filter getAggregate where points >= count of getAggregate
+	public List<Values> getStoppedCars(int xway, int points) {
+		List ret = new ArrayList();
+		return ret;
+	}
+
+	public List<Values> getCurrAvgSpdInSegment(int xway, long abstod) {
+		List ret = new ArrayList();
+		
+		return ret;
 	}
 	
 }
